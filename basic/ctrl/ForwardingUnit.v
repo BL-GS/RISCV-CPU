@@ -5,6 +5,8 @@
 `endif
 
 module ForwardingUnit (
+           input    wire clk,
+           input    wire rst_n,
            input    wire [4: 0]         rs1_ID,
            input    wire [4: 0]         rs2_ID,
            input    wire [4: 0]         wr_EX,
@@ -19,27 +21,44 @@ module ForwardingUnit (
            output   reg  [31: 0]        forwardingB
        );
 
-wire risk_EX_A;
-wire risk_EX_B;
-wire risk_MEM_A;
-wire risk_MEM_B;
+reg risk_EX_A;
+reg risk_EX_B;
+reg risk_MEM_A;
+reg risk_MEM_B;
 
-wire risk_EX_zero;
-wire risk_MEM_zero;
+wire risk_EX_zero  = (wr_EX == 5'd0) ? 1'b1 : 1'b0;
+wire risk_MEM_zero = (wr_MEM == 5'd0) ? 1'b1 : 1'b0;
 
 /***************************************************************
                         EX 冒险
 ****************************************************************/
-assign risk_EX_zero = (wr_EX == 5'd0);
-assign risk_EX_A = (rs1_ID == wr_EX && ~risk_EX_zero && we_EX) ? 1'b1 : 1'b0;
-assign risk_EX_B = (rs2_ID == wr_EX && ~risk_EX_zero && we_EX) ? 1'b1 : 1'b0;
+always @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        risk_EX_A <= 0;
+        risk_EX_B <= 0;
+    end
+    else begin
+        risk_EX_A <= (rs1_ID == wr_EX && ~risk_EX_zero && we_EX) ? 1'b1 : 1'b0;
+        risk_EX_B <= (rs2_ID == wr_EX && ~risk_EX_zero && we_EX) ? 1'b1 : 1'b0;
+    end
+end
+
 
 /***************************************************************
                         MEM 冒险 
 ****************************************************************/
-assign risk_MEM_zero = (wr_MEM == 5'b0);
-assign risk_MEM_A = (rs1_ID == wr_MEM && ~risk_MEM_zero && we_MEM) ? 1'b1 : 1'b0;
-assign risk_MEM_B = (rs2_ID == wr_MEM && ~risk_MEM_zero && we_MEM) ? 1'b1 : 1'b0;
+
+always @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        risk_MEM_A <= 0;
+        risk_MEM_B <= 0;
+    end
+    else begin
+        risk_MEM_A <= (rs1_ID == wr_MEM && ~risk_MEM_zero && we_MEM) ? 1'b1 : 1'b0;
+        risk_MEM_B <= (rs2_ID == wr_MEM && ~risk_MEM_zero && we_MEM) ? 1'b1 : 1'b0;
+    end
+end
+
 
 /***************************************************************
                         前递

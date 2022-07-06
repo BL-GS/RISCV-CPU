@@ -13,18 +13,18 @@ module ALU (
        );
 
 // 计算结果
-wire [31: 0] addOut;
-wire [31: 0] subOut;
-wire [31: 0] andOut;
-wire [31: 0] orOut;
-wire [31: 0] xorOut;
-wire [31: 0] sllOut;
-wire [31: 0] srlOut;
-wire [31: 0] sraOut;
-wire trash_bit;
+wire [31: 0]        addOut;
+wire [31: 0]        subOut;
+wire [31: 0]        andOut;
+wire [31: 0]        orOut;
+wire [31: 0]        xorOut;
+wire [31: 0]        sllOut;
+wire [31: 0]        srlOut;
+wire [31: 0]        sraOut;
+wire                trash_bit;
 
 // 输出寄存器
-reg [31: 0] out_reg;
+reg [31: 0]         out_reg;
 
 
 /***************************************************************
@@ -41,12 +41,12 @@ assign addB   = (subOpe) ? {(~B), 1'b1} : {B, 1'b0};
 
 // 计算输出
 assign {addOut[31: 0], trash_bit} = addA[32: 0] + addB[32: 0];
-assign andOut[31: 0] = A[31: 0] & B[31: 0];
-assign orOut[31: 0]  = A[31: 0] | B[31: 0];
-assign xorOut[31: 0] = A[31: 0] ^ B[31: 0];
-assign sllOut[31: 0] = (Unsigned == `UNSIGNED) ? B[31: 0] : A[31: 0] << $unsigned(B[4: 0]);  // Lui指令特殊处理
-assign srlOut[31: 0] = A[31: 0] >> $unsigned(B[4: 0]);
-assign sraOut[31: 0] = $signed(A[31: 0]) >>> $unsigned(B[4: 0]);
+assign andOut[31: 0]              = A[31: 0] & B[31: 0];
+assign orOut[31: 0]               = A[31: 0] | B[31: 0];
+assign xorOut[31: 0]              = A[31: 0] ^ B[31: 0];
+assign sllOut[31: 0]              = (Unsigned == `UNSIGNED) ? B[31: 0] : A[31: 0] << $unsigned(B[4: 0]);  // Lui指令特殊处理
+assign srlOut[31: 0]              = A[31: 0] >> $unsigned(B[4: 0]);
+assign sraOut[31: 0]              = $signed(A[31: 0]) >>> $unsigned(B[4: 0]);
 
 /***************************************************************
                         输出选择

@@ -5,21 +5,21 @@
 `endif
 
 module BranchPredictor (
-           input wire [`WIDTH_INST - 1 : 0] inst,
-           input wire [`WIDTH_PC - 1 : 0] pc,
-           output wire [`WIDTH_PC - 1 : 0] pre_pc,
-           output reg jump
+           input    wire [`WIDTH_INST - 1 : 0]  inst,
+           input    wire [`WIDTH_PC - 1 : 0]    pc,
+           output   wire [`WIDTH_PC - 1 : 0]    pre_pc,
+           output   reg                         jump
        );
 
-wire [6: 0] opecode;
-wire inst_j;
-wire inst_b;
-wire pc_jump_j;
-wire pc_jump_b;
+wire [6: 0]     opecode;
+wire            inst_j;
+wire            inst_b;
+wire            pc_jump_j;
+wire            pc_jump_b;
 
-reg [31: 0] imm;
-wire [31: 0] imm_B;
-wire [31: 0] imm_J;
+reg [31: 0]     imm;
+wire [31: 0]    imm_B;
+wire [31: 0]    imm_J;
 
 /***************************************************************
                         指令译码

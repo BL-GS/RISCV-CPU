@@ -44,8 +44,8 @@ reg [`IO_INTERFACE_NUM - 1: 0]  BG;    // 总线同意
 
 wire deviceClk;
 
-// 50000 约等于 2ms 多一点 TODO: 需要调整时间
-DeviceCLK  #(.EXTEND(2)) 
+// 50000 约等于 2ms 多一点 
+DeviceCLK  #(.EXTEND(50000)) 
            deviceCLK (
                .clk(clk),
                .rst_n(rst_n),

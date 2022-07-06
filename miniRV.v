@@ -33,7 +33,8 @@ wire [2: 0]     func3_ID   = inst_ID[14: 12];
 wire [6: 0]     opecode_ID = inst_ID[6: 0];
 
 // 读取写入信息
-wire [4: 0]     rs1_ID, rs2_ID;
+wire [4: 0]     rs1_ID = inst_ID[19: 15];
+wire [4: 0]     rs2_ID = inst_ID[24: 20];
 wire [31: 0]    rd1_ID;
 wire [31: 0]    rd2_ID;
 wire [31: 0]    DRAMRd_MEM, DRAMRd_WB;
@@ -47,7 +48,6 @@ wire [31: 0]    ALUOut_EX, ALUOut_MEM, ALUOut_WB;
 wire [1: 0]     COMPOut_EX, COMPOut_MEM, COMPOut_WB;
 wire [31: 0]    COMPExOut_WB;
 wire [31: 0]    immOut_ID;
-
 
 // 例外信号
 wire risk_Ctrl;
@@ -63,23 +63,36 @@ wire [31: 0]    forwardingB;
 // 控制信号
 wire [3: 0]     PCCTRL_ID, PCCTRL_EX;
 wire            RegWe_ID, RegWe_EX, RegWe_MEM, RegWe_WB;
-wire            ASel_ID;
-wire            BSel_ID;
+wire            ASel_ID, ASel_EX;
+wire            BSel_ID, BSel_EX;
 wire            DRAMWE_ID, DRAMWE_EX, DRAMWE_MEM;
 wire [1: 0]     RWSel_ID, RWSel_EX, RWSel_MEM, RWSel_WB;
 wire [4: 0]     SextOpe_ID;
 wire [2: 0]     ALUop_ID, ALUop_EX;
 wire            Unsigned_ID, Unsigned_EX, Unsigned_MEM;
 wire [1: 0]     DRAM_EX_TYPE_ID, DRAM_EX_TYPE_EX, DRAM_EX_TYPE_MEM;
-wire [31: 0]    DRAMIn_EX, DRAMIn_MEM;
+wire [31: 0]    DRAMIn_MEM;
+
 
 `ifdef DEBUG
-// 单周期 CPU 中，wb_have_inst 始终为 1
-assign wb_have_inst = (pc4_WB != 4) ? 1 : 0;
-assign wb_pc        = pc4_WB - 4;
-assign wb_ena       = RegWe_WB;
-assign wb_reg       = RegWr_WB;
-assign wb_value     = RegWd_WB;
+    reg [4: 0] wbInst;
+    always @(posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
+            wbInst <= 0;
+        end
+        else if (stop_ID) begin
+            wbInst[4: 0] <= {wbInst[3: 2], 1'b0, wbInst[1: 0]};
+        end
+        else begin
+            wbInst[4: 0] <= {wbInst[3: 0], 1'b1};
+        end
+    end
+    // 单周期 CPU 中，wb_have_inst 始终为 1
+    assign wb_have_inst = wbInst[4];
+    assign wb_pc        = pc4_WB - 4;
+    assign wb_ena       = RegWe_WB;
+    assign wb_reg       = RegWr_WB;
+    assign wb_value     = RegWd_WB;
 `endif
 
 /****************************************************************
@@ -149,6 +162,8 @@ ID_EX id_ex (
           .rst_n(rst_n),
           .stop_ID(stop_ID),
           .pc(pc_ID),
+          .ASel(ASel_ID),
+          .BSel(BSel_ID),
           .Anum(Anum_ID),
           .Bnum(Bnum_ID),
           .Anum2(Anum2_ID),
@@ -157,13 +172,14 @@ ID_EX id_ex (
           .Unsigned(Unsigned_ID),
           .DRAM_EX_TYPE(DRAM_EX_TYPE_ID),
           .DRAMWE(DRAMWE_ID),
-          .DRAMIn(rd2_ID),
           .RWSel(RWSel_ID),
           .RegWr(inst_ID[11: 7]),
           .RegWe(RegWe_ID),
           .PCCTRL(PCCTRL_ID),
 
           .pc_o(pc_EX),
+          .ASel_o(ASel_EX),
+          .BSel_o(BSel_EX),
           .Anum_o(Anum_EX),
           .Bnum_o(Bnum_EX),
           .Anum2_o(Anum2_EX),
@@ -172,7 +188,6 @@ ID_EX id_ex (
           .Unsigned_o(Unsigned_EX),
           .DRAM_EX_TYPE_o(DRAM_EX_TYPE_EX),
           .DRAMWE_o(DRAMWE_EX),
-          .DRAMIn_o(DRAMIn_EX),
           .RWSel_o(RWSel_EX),
           .RegWr_o(RegWr_EX),
           .RegWe_o(RegWe_EX),
@@ -182,37 +197,53 @@ ID_EX id_ex (
 // 操作数选择
 always @(*) begin
     // A操作数选择
-    if (MUX_A_Forwarding == `ASEL_FORWARDING) begin // 有前递
-        Anum_ID  = (ASel_ID == `ASEL_REG) ? forwardingA : pc_ID;
-        Anum2_ID = (ASel_ID == `ASEL_REG) ? pc_ID : forwardingA;
-    end
-    else begin  // 无前递
-        Anum_ID  = (ASel_ID == `ASEL_REG) ? rd1_ID : pc_ID;
-        Anum2_ID = (ASel_ID == `ASEL_REG) ? pc_ID : rd1_ID;
-    end
+    Anum_ID  = (ASel_ID == `ASEL_REG) ? rd1_ID : pc_ID;
+    Anum2_ID = (ASel_ID == `ASEL_REG) ? pc_ID : rd1_ID;
 end
 
 always @(*) begin
     // B操作数选择
-    if (MUX_B_Forwarding == `BSEL_FORWARDING) begin // 有前递
-        Bnum_ID  = (BSel_ID == `BSEL_REG) ? forwardingB : immOut_ID;
-        Bnum2_ID = (BSel_ID == `BSEL_REG) ? immOut_ID : forwardingB;
-    end
-    else begin  // 无前递
-        Bnum_ID  = (BSel_ID == `BSEL_REG) ? rd2_ID : immOut_ID;
-        Bnum2_ID = (BSel_ID == `BSEL_REG) ? immOut_ID : rd2_ID;
-    end
+    Bnum_ID  = (BSel_ID == `BSEL_REG) ? rd2_ID : immOut_ID;
+    Bnum2_ID = (BSel_ID == `BSEL_REG) ? immOut_ID : rd2_ID;
 end
 
 /****************************************************************
                         执行阶段
 *****************************************************************/
 
+reg [31: 0] Anum_EX_AfterForwarding, Bnum_EX_AfterForwarding;
+reg [31: 0] Anum2_EX_AfterForwarding, Bnum2_EX_AfterForwarding;
+
+// 前递数选择
+always @(*) begin
+    // A操作数选择
+    if (MUX_A_Forwarding == `ASEL_FORWARDING) begin // 有前递
+        Anum_EX_AfterForwarding  = (ASel_EX == `ASEL_REG) ? forwardingA : Anum_EX;
+        Anum2_EX_AfterForwarding = (ASel_EX == `ASEL_REG) ? Anum2_EX : forwardingA;
+    end
+    else begin  // 无前递
+        Anum_EX_AfterForwarding  = Anum_EX;
+        Anum2_EX_AfterForwarding = Anum2_EX;
+    end
+end
+always @(*) begin
+    // A操作数选择
+    if (MUX_B_Forwarding == `BSEL_FORWARDING) begin // 有前递
+        Bnum_EX_AfterForwarding  = (BSel_EX == `BSEL_REG) ? forwardingB : Bnum_EX;
+        Bnum2_EX_AfterForwarding = (BSel_EX == `BSEL_REG) ? Bnum2_EX : forwardingB;
+    end
+    else begin  // 无前递
+        Bnum_EX_AfterForwarding  = Bnum_EX;
+        Bnum2_EX_AfterForwarding = Bnum2_EX;
+    end
+end
+
+
 EX Ex (
-       .Ain(Anum_EX),
-       .Bin(Bnum_EX),
-       .COMPAin(Anum2_EX),
-       .COMPBin(Bnum2_EX),
+       .Ain(Anum_EX_AfterForwarding),
+       .Bin(Bnum_EX_AfterForwarding),
+       .COMPAin(Anum2_EX_AfterForwarding),
+       .COMPBin(Bnum2_EX_AfterForwarding),
        .ALUop(ALUop_EX),
        .Unsigned(Unsigned_EX),
        .COMPOut(COMPOut_EX),
@@ -231,7 +262,7 @@ EX_MEM ex_mem (
            .RegWe(RegWe_EX),
            .COMPOut(COMPOut_EX),
            .ALUOut(ALUOut_EX),
-           .DRAMIn(DRAMIn_EX),
+           .DRAMIn(Bnum2_EX_AfterForwarding), // 对于 s 型指令，必有立即数相加，则用 Bnum2 可以得到寄存器或者前递数据
            .Unsigned(Unsigned_EX),
 
            .pc_o(pc_MEM),
@@ -297,30 +328,25 @@ WB Wb (
 /****************************************************************
                         前递和例外处理
 *****************************************************************/
-wire TYPE_COMP_R = (opecode_ID[6: 2] == 5'b01100 && func3_ID[2:1] == 2'b01) ? 1'b1 : 1'b0;
-wire TYPE_COMP_I = (opecode_ID[6: 2] == 5'b00100 && func3_ID[2:1] == 2'b01) ? 1'b1 : 1'b0;
 
 reg isLoad; // 需要代表 EX 阶段的载入判断
-reg isLoad_MEM;
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
         isLoad <= 1'b0;
-        isLoad_MEM <= 1'b0;
     end
     else begin
         isLoad <= (opecode_ID[6: 2] == 5'b00000) ? 1'b1 : 1'b0;
-        isLoad_MEM <= isLoad;
     end
 end
 
-reg rd_Type_EX;
-reg rd_Type_MEM;
-wire [31: 0] rd_EX = (rd_Type_EX) ? {31'b0, COMPOut_EX[0]} : ALUOut_EX;
-wire [31: 0] rd_MEM = (isLoad_MEM) ? DRAMRd_MEM :
-     (rd_Type_MEM) ? {31'b0, COMPOut_MEM[0]} : ALUOut_MEM; // TODO:
+reg rd_Type_EX, rd_Type_MEM;
+wire [31: 0] rd_EX  = (rd_Type_MEM) ? {31'b0, COMPOut_MEM[0]} : ALUOut_MEM;
+wire [31: 0] rd_MEM = RegWd_WB;
 
-assign rs1_ID = inst_ID[19: 15];
-assign rs2_ID = inst_ID[24: 20];
+wire   TYPE_COMP_R = (opecode_ID[6: 2] == 5'b01100 && func3_ID[2:1] == 2'b01) ? 1'b1 : 1'b0;
+wire   TYPE_COMP_I = (opecode_ID[6: 2] == 5'b00100 && func3_ID[2:1] == 2'b01) ? 1'b1 : 1'b0;
+assign rs1_ID      = inst_ID[19: 15];
+assign rs2_ID      = inst_ID[24: 20];
 
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
@@ -334,6 +360,8 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 ForwardingUnit forwardingUnit (
+                   .clk(clk),
+                   .rst_n(rst_n),
                    .rs1_ID(rs1_ID),
                    .rs2_ID(rs2_ID),
                    .wr_EX(RegWr_EX),
@@ -358,6 +386,5 @@ ExceptionCTRL exceptionCTRL (
                   .stop_IF(stop_IF),
                   .stop_ID(stop_ID)
               );
-
 
 endmodule

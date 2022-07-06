@@ -4,7 +4,7 @@
 ----------------------------------------------------------------*/
 
 module DeviceCLK
-       # (parameter EXTEND = 50000)
+       # (parameter EXTEND = 25000)
        (
            input wire clk,
            input wire rst_n,

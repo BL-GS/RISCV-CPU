@@ -104,8 +104,8 @@
 `define PCCTRL_B_NE     2'b01
 `define PCCTRL_B_LT     2'b10
 `define PCCTRL_B_GEQ    2'b11
-`define PCCTRL_BJ       2
-`define PCCTRL_BRANCH   3
+`define PCCTRL_B        2
+`define PCCTRL_J        3
 
 /****************************************************************
                         IO中常量

@@ -26,13 +26,12 @@ module CTRL (
 wire r, i, s, b, u, j;
 reg  [5: 0] type_reg;
 
+wire TYPE_LOAD;
 wire TYPE_COMP_R, TYPE_COMP_I;  // 比较指令(R:与寄存器内容比较 ; I:与立即数内容比较)
 wire TYPE_JUMP;                 // 无条件跳转指令
 wire TYPE_PC;                   // 需要PC参与运行的指令
 wire TYPE_MOVE;                 // 移位指令
-wire TYPE_LOAD;                 // Load 指令
-
-wire TYPE_NOP; // 空指令
+wire TYPE_NOP;                  // 空指令
 
 // 指令类型
 assign {r, i, s, b, u, j} = type_reg[5: 0];
@@ -163,25 +162,25 @@ assign DRAM_EX_TYPE[1: 0] = func3[1: 0];
 ****************************************************************/
 
 always @(*) begin
-PCCTRL[`PCCTRL_BRANCH] = (b | TYPE_JUMP);
-PCCTRL[`PCCTRL_BJ] = b;
-case (func3) 
-    3'b000: begin // beq
-        PCCTRL[1: 0] = `PCCTRL_B_EQ;
-    end
-    3'b001: begin // bne
-        PCCTRL[1: 0] = `PCCTRL_B_NE;
-    end
-    3'b100: begin // blt
-        PCCTRL[1: 0] = `PCCTRL_B_LT;
-    end
-    3'b110: begin // bltu
-        PCCTRL[1: 0] = `PCCTRL_B_LT;
-    end
-    default: begin // bge / bgeu
-        PCCTRL[1: 0] = `PCCTRL_B_GEQ;
-    end
-endcase
+    PCCTRL[`PCCTRL_J] = TYPE_JUMP;
+    PCCTRL[`PCCTRL_B] = b;
+    case (func3)
+        3'b000: begin // beq
+            PCCTRL[1: 0] = `PCCTRL_B_EQ;
+        end
+        3'b001: begin // bne
+            PCCTRL[1: 0] = `PCCTRL_B_NE;
+        end
+        3'b100: begin // blt
+            PCCTRL[1: 0] = `PCCTRL_B_LT;
+        end
+        3'b110: begin // bltu
+            PCCTRL[1: 0] = `PCCTRL_B_LT;
+        end
+        default: begin // bge / bgeu
+            PCCTRL[1: 0] = `PCCTRL_B_GEQ;
+        end
+    endcase
 end
 
 
