@@ -18,7 +18,10 @@ assign row_en[`DEVICE_NUM_KB_ROW - 1: 0] = row_en_reg[`DEVICE_NUM_KB_ROW - 1: 0]
 // 输出数据 TODO:
 assign data[`DEVICE_NUM_KB_COL - 1: 0] = col_signal[`DEVICE_NUM_KB_COL - 1: 0];
 
-// 扫描键盘
+/***************************************************************
+                        扫描键盘
+****************************************************************/
+
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
         row_en_reg[`DEVICE_NUM_KB_ROW - 1: 0] <= {`DEVICE_NUM_KB_ROW{1'b1}};

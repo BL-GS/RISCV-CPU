@@ -32,7 +32,7 @@ assign    led_en[`DEVICE_NUM_NUMLED_EN - 1 : 0] = statu[`DEVICE_NUM_NUMLED_EN - 
 ****************************************************************/
 
 reg [6: 0] led;
-assign {led_ca, led_cb, led_cc, led_cd, led_ce, led_cf, led_cg} = led[6: 0];
+assign {led_cg, led_cf, led_ce, led_cd, led_cc, led_cb, led_ca} = led[6: 0];
 
 assign    led_dp = 1'b1;
 
@@ -84,7 +84,7 @@ always @(*) begin
             led[6: 0] = 7'b0010000;
         end
         default: begin
-            led[6: 0] = 7'b0110000;
+            led[6: 0] = 7'b0111000;
         end
     endcase
 end

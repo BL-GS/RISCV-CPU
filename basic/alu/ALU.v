@@ -12,15 +12,6 @@ module ALU (
            output   wire [31: 0]    out
        );
 
-
-// 减法复用加法器: 减数取反末位加一
-wire [32: 0] addA;
-wire [32: 0] addB;
-wire         subOpe;
-assign subOpe = (ALUop == `SUB);
-assign addA   = {A[31: 0], subOpe};
-assign addB   = (subOpe) ? {(~B), 1'b1} : {B, 1'b0};
-
 // 计算结果
 wire [31: 0] addOut;
 wire [31: 0] subOut;
@@ -35,7 +26,20 @@ wire trash_bit;
 // 输出寄存器
 reg [31: 0] out_reg;
 
-// 比较运算
+
+/***************************************************************
+                        运算
+****************************************************************/
+
+// 减法复用加法器: 减数取反末位加一
+wire [32: 0] addA;
+wire [32: 0] addB;
+wire         subOpe;
+assign subOpe = (ALUop == `SUB);
+assign addA   = {A[31: 0], subOpe};
+assign addB   = (subOpe) ? {(~B), 1'b1} : {B, 1'b0};
+
+// 计算输出
 assign {addOut[31: 0], trash_bit} = addA[32: 0] + addB[32: 0];
 assign andOut[31: 0] = A[31: 0] & B[31: 0];
 assign orOut[31: 0]  = A[31: 0] | B[31: 0];
@@ -44,7 +48,10 @@ assign sllOut[31: 0] = (Unsigned == `UNSIGNED) ? B[31: 0] : A[31: 0] << $unsigne
 assign srlOut[31: 0] = A[31: 0] >> $unsigned(B[4: 0]);
 assign sraOut[31: 0] = $signed(A[31: 0]) >>> $unsigned(B[4: 0]);
 
-// 输出
+/***************************************************************
+                        输出选择
+****************************************************************/
+
 assign out = out_reg;
 
 always @(*) begin

@@ -53,11 +53,18 @@ DeviceCLK  #(.EXTEND(50000))
            );
 
 /***************************************************************
-                        选择设备
+                        设备控制
 ****************************************************************/
-
 reg [`IO_BUS_WIDTH_CTRL - 1: 0] ctrl_input [`IO_INTERFACE_NUM - 1 : 0];
 
+// 控制线
+always @(*) begin
+    for (i = 0; i < `IO_INTERFACE_NUM; i = i + 1) begin
+        ctrl_input[i][`IO_BUS_WIDTH_CTRL - 1: 0] =  ctrl;
+    end
+end
+
+// 总线同意信号
 always @(*) begin
     if (addr[`IO_BUS_WIDTH_ADDR - 1: 12] == 20'hFFFFF) begin // 外设
         case (addr[7: 4])
@@ -83,14 +90,9 @@ always @(*) begin
     end
 end
 
-
-// 控制线
-always @(*) begin
-    for (i = 0; i < `IO_INTERFACE_NUM; i = i + 1) begin
-        ctrl_input[i][`IO_BUS_WIDTH_CTRL - 1: 0] =  ctrl;
-    end
-end
-
+/***************************************************************
+                        设备连接
+****************************************************************/
 
 Interface_RAM interface_RAM (
                   .clk(clk),

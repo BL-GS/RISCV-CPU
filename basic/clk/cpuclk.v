@@ -36,8 +36,10 @@ reg [`DEVICE_NUM_SWITCH - 1: 0]        switch;
 // 输出设备—�?�LED�?
 wire [`DEVICE_NUM_LED - 1: 0]           led;
 // 输入设备—�?�键�?
+/*
 wire [`DEVICE_NUM_KB_COL - 1: 0]        col_signal;
 wire [`DEVICE_NUM_KB_ROW - 1: 0]        row_en;
+*/
 // 输出设备—�?�LED数码�?
 wire [`DEVICE_NUM_NUMLED_EN - 1: 0]     led_en;
 wire               led_ca;
@@ -106,10 +108,10 @@ BUS bus (
         .switch(switch),
 
         .led(led),
-
+/*****
         .col_signal(col_signal),
         .row_en(row_en),
-
+*/
         .led_en(led_en),
         .led_ca(led_ca),
         .led_cb(led_cb),
