@@ -29,7 +29,8 @@ assign    rd2 = (rs2 == 0) ? 0 : rf[$unsigned(rs2)];
                         写寄存器(时钟上升沿)
 ****************************************************************/
 
-always @ (posedge clk or negedge rst_n) begin
+// 时钟下降沿写入
+always @ (negedge clk or negedge rst_n) begin
     if (~rst_n) begin
         rf[1][31: 0]  <= 0;
         rf[2][31: 0]  <= 0;

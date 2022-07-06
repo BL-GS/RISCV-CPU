@@ -5,35 +5,15 @@
 `endif
 
 module EX (
-           input   wire [31: 0]    rd1,
-           input   wire [31: 0]    rd2,
-           input   wire [31: 0]    imm,
-           input   wire [31: 0]    pc,
-           input   wire            ASel,
-           input   wire            BSel,
+           input   wire [31: 0]    Ain,
+           input   wire [31: 0]    Bin,
+           input   wire [31: 0]    COMPAin,
+           input   wire [31: 0]    COMPBin,
            input   wire [2: 0]     ALUop,
            input   wire            Unsigned,
            output  wire [1: 0]     COMPOut,
-           output  wire [31: 0]    COMPExOut,
            output  wire [31: 0]    ALUOut
        );
-
-/***************************************************************
-                        计算数据多路选择
-****************************************************************/
-
-wire [31: 0] Ain;
-wire [31: 0] Bin;
-wire [31: 0] COMPAin;
-wire [31: 0] COMPBin;
-
-assign Ain     = (ASel == `ASEL_PC) ? pc : rd1;
-assign COMPAin = (ASel == `ASEL_PC) ? rd1 : pc;
-assign Bin     = (BSel == `BSEL_IMM) ? imm : rd2;
-assign COMPBin = (BSel == `BSEL_IMM) ? rd2 : imm;
-
-// 对比较结果进行符号扩展
-assign COMPExOut[31: 0] = {31'b0, COMPOut[0]};
 
 /***************************************************************
                         设备连接

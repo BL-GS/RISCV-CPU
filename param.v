@@ -4,6 +4,34 @@
 `define ALU_PARAM
 
 /****************************************************************
+                        基本部件常量
+*****************************************************************/
+
+// 数字位宽
+`define WIDTH_PC            32
+`define WIDTH_INST          32
+`define WIDTH_OPENUM        32
+`define WIDTH_ALUOUT        32
+`define WIDTH_COMPOUT       2
+`define WIDTH_COMP_EX_OUT   32
+`define WIDTH_DRAMRd        32
+`define WIDTH_REGMARK       5
+
+// 控制信号
+`define WIDTH_ALUOpe        4
+`define WIDTH_ALUOp         3
+`define WIDTH_Unsigned      1     
+`define WIDTH_DRAM_EX_TYPE  2
+`define WIDTH_DRAMWE        1
+`define WIDTH_RWSel         2
+`define WIDTH_RegWE         1
+`define WIDTH_DRAMIN        32
+`define WIDTH_PCCTRL        4
+`define WIDTH_PCSEL         1
+
+
+
+/****************************************************************
                         基础部件（Basic）中常量
 *****************************************************************/
 
@@ -46,8 +74,8 @@
 *****************************************************************/
 
 // PC 跳转控制
-`define PCSEL_PC4       1'b0    // 顺序执行
-`define PCSEL_JUMP      1'b1    // 跳转执行
+`define PCSEL_PC4           1'b0    // 顺序执行
+`define PCSEL_JUMP          1'b1    // 跳转执行
 
 // 寄存器写入控制
 `define REGWE_READ      1'b0    // 不可写
@@ -58,6 +86,8 @@
 `define ASEL_PC         1'b1    // 选择 PC 输入 A
 `define BSEL_REG        1'b0    // 选择寄存器输入 B
 `define BSEL_IMM        1'b1    // 选择立即数输入 B
+`define ASEL_FORWARDING 1'b1
+`define BSEL_FORWARDING 1'b1 
 
 // 写主存控制
 `define DRAM_READ       1'b0    // 不可写
@@ -68,6 +98,14 @@
 `define REGWD_COMPOUT   2'b01   // 写回比较结果
 `define REGWD_ALUOUT    2'b11   // 写回 ALU 运算结果
 `define REGWD_DRAMRD    2'b10   // 写回主存读取结果
+
+// PC跳转指令类型
+`define PCCTRL_B_EQ     2'b00
+`define PCCTRL_B_NE     2'b01
+`define PCCTRL_B_LT     2'b10
+`define PCCTRL_B_GEQ    2'b11
+`define PCCTRL_BJ       2
+`define PCCTRL_BRANCH   3
 
 /****************************************************************
                         IO中常量

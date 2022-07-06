@@ -59,14 +59,14 @@ initial begin
     #20;
     fpga_rst = 0;
     switch = 24'b000_00000_00000000_00000000; // nop
-    #5000
+    #2000
     switch = 24'b001_00000_00000001_00000001; // 1 + 1
-    #5000;
+    #2000;
     switch = 24'b001_00000_11111111_00000000; // -1 + 0
     #5000;
     switch = 24'b111_00000_00000010_00000011; // 2 * 3
     #5000;
-    switch = 24'b001_00000_00000011_11111110; // 3 * -2
+    switch = 24'b111_00000_00000011_11111110; // 3 * -2
 
     #20000;
     $finish;
@@ -77,15 +77,15 @@ end
 
 // 模块连接===========================================================
 
-wire [`IO_BUS_WIDTH_DATA - 1: 0] mem_wd;
-wire [`IO_BUS_WIDTH_DATA - 1: 0] mem_rd;
-wire [`IO_BUS_WIDTH_ADDR - 1: 0] mem_addr;
-wire [`IO_BUS_WIDTH_CTRL - 1: 0] mem_ctrl;
-wire [`IO_BUS_WIDTH_DATA - 1: 0] busData;
-wire mem_we;
+wire [`IO_BUS_WIDTH_DATA - 1: 0]    mem_wd;
+wire [`IO_BUS_WIDTH_DATA - 1: 0]    mem_rd;
+wire [`IO_BUS_WIDTH_ADDR - 1: 0]    mem_addr;
+wire [`IO_BUS_WIDTH_CTRL - 1: 0]    mem_ctrl;
+wire                                mem_we;
+wire [`IO_BUS_WIDTH_DATA - 1: 0]    busData;
 
-assign mem_rd = busData;
-assign busData = (mem_we) ? mem_wd : {`IO_BUS_WIDTH_DATA{1'bz}}; // 写入时才接入输入
+assign mem_rd  = busData;
+assign busData = (mem_we) ? mem_wd : 32'hzzzzzzzz; // ????????
 
 mini_rv RV (
             .clk(cpu_clk),

@@ -9,15 +9,14 @@ module CTRL (
            input   wire[6: 0]  func7,
            input   wire[2: 0]  func3,
            input   wire[6: 0]  opecode,
-           input   wire[1: 0]  COMPRes,
-           output  reg         PCSel,
            output  reg         RegWe,
            output  reg         ASel,
            output  reg         BSel,
            output  reg         DRAMWE,
            output  reg[1: 0]   RWSel,
            output  wire[4: 0]  SextOpe,
-           output  wire[1: 0]  DRAM_EX_TYPE
+           output  wire[1: 0]  DRAM_EX_TYPE,
+           output  reg [`WIDTH_PCCTRL - 1: 0]  PCCTRL
        );
 
 /***************************************************************
@@ -27,25 +26,16 @@ module CTRL (
 wire r, i, s, b, u, j;
 reg  [5: 0] type_reg;
 
-wire COMP_EQ;                   // 比较结果：等于
-wire COMP_NEQ;                  // 比较结果：不等于
-wire COMP_LE;                   // 比较结果：小于
-wire COMP_GE_EQ;                // 比较结果：大于等于
-
 wire TYPE_COMP_R, TYPE_COMP_I;  // 比较指令(R:与寄存器内容比较 ; I:与立即数内容比较)
 wire TYPE_JUMP;                 // 无条件跳转指令
 wire TYPE_PC;                   // 需要PC参与运行的指令
 wire TYPE_MOVE;                 // 移位指令
 wire TYPE_LOAD;                 // Load 指令
 
+wire TYPE_NOP; // 空指令
+
 // 指令类型
 assign {r, i, s, b, u, j} = type_reg[5: 0];
-
-// 比较结果
-assign COMP_EQ    = (COMPRes == 2'b00) ? 1'b1 : 1'b0;
-assign COMP_NEQ   = ~COMP_EQ;
-assign COMP_LE    = (COMPRes == 2'b01) ? 1'b1 : 1'b0;
-assign COMP_GE_EQ = ~COMP_LE;
 
 // 符号扩展控制
 assign SextOpe     = {i, s, b, j, u};
@@ -55,6 +45,7 @@ assign TYPE_JUMP   = (j || (opecode[6: 2] == 5'b11001)) ? 1'b1 : 1'b0;
 assign TYPE_PC     = ((j | b | TYPE_COMP_R | TYPE_COMP_I ) == 1'b1 || (opecode[6: 2] == 5'b00101));
 assign TYPE_LOAD   = (opecode[6: 2] == 5'b00000) ? 1'b1 : 1'b0;
 
+assign TYPE_NOP    = (opecode[1: 0] == 2'b00) ? 1'b1 : 1'b0;
 
 /***************************************************************
                         指令类型判断
@@ -87,43 +78,11 @@ always @ (*) begin
 end
 
 /***************************************************************
-                        PC 跳转控制
-****************************************************************/
-
-always @ (*) begin
-    if (b) begin
-        casez (func3)
-            3'b000: begin // beq
-                PCSel = (COMP_EQ) ? `PCSEL_JUMP : `PCSEL_PC4;
-            end
-            3'b001: begin // bne
-                PCSel = (COMP_NEQ) ? `PCSEL_JUMP : `PCSEL_PC4;
-            end
-            3'b1?0: begin // blt / bltu
-                PCSel = (COMP_LE) ? `PCSEL_JUMP : `PCSEL_PC4;
-            end
-            3'b1?1: begin // bge / bgeu
-                PCSel = (COMP_GE_EQ) ? `PCSEL_JUMP : `PCSEL_PC4;
-            end
-            default: begin
-                PCSel = `PCSEL_PC4;
-            end
-        endcase
-    end
-    else if (TYPE_JUMP) begin
-        PCSel = `PCSEL_JUMP;
-    end
-    else begin
-        PCSel = `PCSEL_PC4;
-    end
-end
-
-/***************************************************************
                         寄存器写入控制
 ****************************************************************/
 
 always @(*) begin
-    if (s | b | ~rst_n) begin
+    if (~rst_n | s | b | TYPE_NOP) begin
         RegWe = `REGWE_READ;
     end
     else begin
@@ -159,7 +118,10 @@ end
 ****************************************************************/
 
 always @(*) begin
-    if (TYPE_LOAD) begin
+    if (TYPE_NOP) begin
+        RWSel = `REGWD_ALUOUT;
+    end
+    else if (TYPE_LOAD) begin
         RWSel = `REGWD_DRAMRD; // Load 指令
     end
     else if (TYPE_COMP_R | TYPE_COMP_I) begin
@@ -194,5 +156,33 @@ end
 ****************************************************************/
 
 assign DRAM_EX_TYPE[1: 0] = func3[1: 0];
+
+
+/***************************************************************
+                        指令跳转分析
+****************************************************************/
+
+always @(*) begin
+PCCTRL[`PCCTRL_BRANCH] = (b | TYPE_JUMP);
+PCCTRL[`PCCTRL_BJ] = b;
+case (func3) 
+    3'b000: begin // beq
+        PCCTRL[1: 0] = `PCCTRL_B_EQ;
+    end
+    3'b001: begin // bne
+        PCCTRL[1: 0] = `PCCTRL_B_NE;
+    end
+    3'b100: begin // blt
+        PCCTRL[1: 0] = `PCCTRL_B_LT;
+    end
+    3'b110: begin // bltu
+        PCCTRL[1: 0] = `PCCTRL_B_LT;
+    end
+    default: begin // bge / bgeu
+        PCCTRL[1: 0] = `PCCTRL_B_GEQ;
+    end
+endcase
+end
+
 
 endmodule
