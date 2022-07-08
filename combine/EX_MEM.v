@@ -25,7 +25,8 @@ module EX_MEM (
            output reg [`WIDTH_REGMARK - 1: 0]         RegWr_o,
            output reg [`WIDTH_RegWE - 1: 0]           RegWe_o,
            output reg [`WIDTH_COMPOUT - 1: 0]         COMPOut_o,
-           output reg [`WIDTH_ALUOUT - 1: 0]          ALUOut_o,
+           (*EQUIVALENT_REGISTER_REMOVAL="NO"*)output reg [`WIDTH_ALUOUT - 1: 0]          ALUOut_o,
+           (*EQUIVALENT_REGISTER_REMOVAL="NO"*)output reg [`WIDTH_ALUOUT - 1: 0]          ALUOut_mem_o,
            output reg [`WIDTH_DRAMIN - 1: 0]          DRAMIn_o,
            output reg [`WIDTH_Unsigned - 1: 0]        Unsigned_o
        );
@@ -45,6 +46,7 @@ always @(posedge clk or negedge rst_n) begin
         RegWe_o       [`WIDTH_RegWE - 1: 0]           <= 0;
         COMPOut_o     [`WIDTH_COMPOUT - 1: 0]         <= 0;
         ALUOut_o      [`WIDTH_ALUOUT - 1: 0]          <= 0;
+        ALUOut_mem_o      [`WIDTH_ALUOUT - 1: 0]      <= 0;
         DRAMIn_o      [`WIDTH_DRAMIN - 1: 0]          <= 0;
         Unsigned_o    [`WIDTH_Unsigned - 1: 0]        <= 0;
     end
@@ -57,6 +59,7 @@ always @(posedge clk or negedge rst_n) begin
         RegWe_o       [`WIDTH_RegWE - 1: 0]           <= RegWe;
         COMPOut_o     [`WIDTH_COMPOUT - 1: 0]         <= COMPOut;
         ALUOut_o      [`WIDTH_ALUOUT - 1: 0]          <= ALUOut;
+        ALUOut_mem_o      [`WIDTH_ALUOUT - 1: 0]      <= ALUOut;
         DRAMIn_o      [`WIDTH_DRAMIN - 1: 0]          <= DRAMIn;
         Unsigned_o    [`WIDTH_Unsigned - 1: 0]        <= Unsigned;
     end

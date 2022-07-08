@@ -5,7 +5,6 @@
 `endif
 
 module CTRL (
-           input   wire        rst_n,
            input   wire[6: 0]  func7,
            input   wire[2: 0]  func3,
            input   wire[6: 0]  opecode,
@@ -16,6 +15,8 @@ module CTRL (
            output  reg[1: 0]   RWSel,
            output  wire[4: 0]  SextOpe,
            output  wire[1: 0]  DRAM_EX_TYPE,
+           output  wire        TYPE_COMP,
+           output  wire        TYPE_LOAD,
            output  reg [`WIDTH_PCCTRL - 1: 0]  PCCTRL
        );
 
@@ -26,7 +27,6 @@ module CTRL (
 wire r, i, s, b, u, j;
 reg  [5: 0] type_reg;
 
-wire TYPE_LOAD;
 wire TYPE_COMP_R, TYPE_COMP_I;  // 比较指令(R:与寄存器内容比较 ; I:与立即数内容比较)
 wire TYPE_JUMP;                 // 无条件跳转指令
 wire TYPE_PC;                   // 需要PC参与运行的指令
@@ -38,10 +38,11 @@ assign {r, i, s, b, u, j} = type_reg[5: 0];
 
 // 符号扩展控制
 assign SextOpe     = {i, s, b, j, u};
-assign TYPE_COMP_R = (opecode[6: 2] == 5'b01100 && func3[2:1] == 2'b01) ? 1'b1 : 1'b0;
-assign TYPE_COMP_I = (opecode[6: 2] == 5'b00100 && func3[2:1] == 2'b01) ? 1'b1 : 1'b0;
+assign TYPE_COMP   = (opecode[6: 2] == 5'b0?100 && func3[2:1] == 2'b01) ? 1'b1 : 1'b0;
+assign TYPE_COMP_R = (TYPE_COMP & opecode[5]) ? 1'b1 : 1'b0;
+assign TYPE_COMP_I = (TYPE_COMP & ~opecode[5]) ? 1'b1 : 1'b0;
 assign TYPE_JUMP   = (j || (opecode[6: 2] == 5'b11001)) ? 1'b1 : 1'b0;
-assign TYPE_PC     = ((j | b | TYPE_COMP_R | TYPE_COMP_I ) == 1'b1 || (opecode[6: 2] == 5'b00101));
+assign TYPE_PC     = ((j | b | TYPE_COMP ) == 1'b1 || (opecode[6: 2] == 5'b00101));
 assign TYPE_LOAD   = (opecode[6: 2] == 5'b00000) ? 1'b1 : 1'b0;
 
 assign TYPE_NOP    = (opecode[1: 0] == 2'b00) ? 1'b1 : 1'b0;
@@ -81,7 +82,7 @@ end
 ****************************************************************/
 
 always @(*) begin
-    if (~rst_n | s | b | TYPE_NOP) begin
+    if (s | b | TYPE_NOP) begin
         RegWe = `REGWE_READ;
     end
     else begin
@@ -123,7 +124,7 @@ always @(*) begin
     else if (TYPE_LOAD) begin
         RWSel = `REGWD_DRAMRD; // Load 指令
     end
-    else if (TYPE_COMP_R | TYPE_COMP_I) begin
+    else if (TYPE_COMP) begin
         RWSel = `REGWD_COMPOUT; // 比较指令
     end
     else if (TYPE_JUMP) begin
@@ -139,10 +140,7 @@ end
 ****************************************************************/
 
 always @(*) begin
-    if (~rst_n) begin
-        DRAMWE = `DRAM_READ;
-    end
-    else if (s) begin
+    if (s) begin
         DRAMWE = `DRAM_WRITE;
     end
     else begin

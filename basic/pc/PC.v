@@ -13,7 +13,7 @@ module PC(
 
 always @ (posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        pc <= 0;
+        pc <= -4;
     end
     else if (risk_Ctrl) begin
         pc <= branch_pc + 4;

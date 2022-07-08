@@ -31,6 +31,8 @@ wire [31: 0]    inst_ID;
 wire [6: 0]     func7_ID   = inst_ID[31: 25];
 wire [2: 0]     func3_ID   = inst_ID[14: 12];
 wire [6: 0]     opecode_ID = inst_ID[6: 0];
+wire            TYPE_COMP_ID;
+wire            TYPE_LOAD_ID;
 
 // 读取写入信息
 wire [4: 0]     rs1_ID = inst_ID[19: 15];
@@ -44,7 +46,7 @@ wire [4: 0]     RegWr_ID, RegWr_EX, RegWr_MEM, RegWr_WB;
 // 运算结果
 reg  [31: 0]    Anum_ID, Anum2_ID, Bnum_ID, Bnum2_ID;
 wire [31: 0]    Anum_EX, Anum2_EX, Bnum_EX, Bnum2_EX;
-wire [31: 0]    ALUOut_EX, ALUOut_MEM, ALUOut_WB;
+wire [31: 0]    ALUOut_EX, ALUOut_MEM, ALUOut_MEM_mem, ALUOut_WB;
 wire [1: 0]     COMPOut_EX, COMPOut_MEM, COMPOut_WB;
 wire [31: 0]    COMPExOut_WB;
 wire [31: 0]    immOut_ID;
@@ -128,7 +130,6 @@ IF_ID if_id (
 
 // 控制模块
 CTRL ctrl (
-         .rst_n(rst_n),
          .func7(func7_ID),
          .func3(func3_ID),
          .opecode(opecode_ID),
@@ -139,6 +140,8 @@ CTRL ctrl (
          .RWSel(RWSel_ID),
          .SextOpe(SextOpe_ID),
          .DRAM_EX_TYPE(DRAM_EX_TYPE_ID),
+         .TYPE_COMP(TYPE_COMP_ID),
+         .TYPE_LOAD(TYPE_LOAD_ID),
          .PCCTRL(PCCTRL_ID)
      );
 
@@ -273,6 +276,7 @@ EX_MEM ex_mem (
            .RegWe_o(RegWe_MEM),
            .COMPOut_o(COMPOut_MEM),
            .ALUOut_o(ALUOut_MEM),
+           .ALUOut_mem_o(ALUOut_MEM_mem),
            .DRAMIn_o(DRAMIn_MEM),
            .Unsigned_o(Unsigned_MEM)
        );
@@ -281,7 +285,7 @@ EX_MEM ex_mem (
                         执行阶段
 *****************************************************************/
 
-assign mem_addr   = ALUOut_MEM;
+assign mem_addr   = ALUOut_MEM_mem;
 assign mem_ctrl   = {Unsigned_MEM, DRAM_EX_TYPE_MEM[1: 0], DRAMWE_MEM};
 assign mem_wd     = DRAMIn_MEM;
 assign mem_we     = DRAMWE_MEM;
@@ -335,16 +339,14 @@ always @(posedge clk or negedge rst_n) begin
         isLoad <= 1'b0;
     end
     else begin
-        isLoad <= (opecode_ID[6: 2] == 5'b00000) ? 1'b1 : 1'b0;
+        isLoad <= TYPE_LOAD_ID;
     end
 end
 
 reg rd_Type_EX, rd_Type_MEM;
-wire [31: 0] rd_EX  = (rd_Type_MEM) ? {31'b0, COMPOut_MEM[0]} : ALUOut_MEM;
-wire [31: 0] rd_MEM = RegWd_WB;
+wire [31: 0] rd_EX  = (rd_Type_MEM) ? {31'b0, COMPOut_MEM[0]} : ALUOut_MEM[31: 0];
+wire [31: 0] rd_MEM = RegWd_WB[31: 0];
 
-wire   TYPE_COMP_R = (opecode_ID[6: 2] == 5'b01100 && func3_ID[2:1] == 2'b01) ? 1'b1 : 1'b0;
-wire   TYPE_COMP_I = (opecode_ID[6: 2] == 5'b00100 && func3_ID[2:1] == 2'b01) ? 1'b1 : 1'b0;
 assign rs1_ID      = inst_ID[19: 15];
 assign rs2_ID      = inst_ID[24: 20];
 
@@ -354,7 +356,7 @@ always @(posedge clk or negedge rst_n) begin
         rd_Type_MEM <= 0;
     end
     else begin
-        rd_Type_EX <= (TYPE_COMP_I | TYPE_COMP_R);
+        rd_Type_EX  <= TYPE_COMP_ID;
         rd_Type_MEM <= rd_Type_EX;
     end
 end

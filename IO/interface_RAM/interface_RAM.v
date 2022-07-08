@@ -44,7 +44,7 @@ assign input_call  = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_WRITE))
 assign output_call = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_READ)) ? 1'b1 : 1'b0;
 
 wire TYPE_B; // byte 类需要的扩展
-wire TYPE_H; // byte 和 half-word 类需要的扩展
+wire TYPE_HB; // byte 和 half-word 类需要的扩展
 wire Unsigned; // 符号扩展控制
 
 assign TYPE_B    = ~(ctrl[`IO_BUS_CTRL_TYPE_B] | ctrl[`IO_BUS_CTRL_TYPE_HB]);

@@ -17,7 +17,7 @@ wire            inst_b;
 wire            pc_jump_j;
 wire            pc_jump_b;
 
-reg [31: 0]     imm;
+reg  [31: 0]     imm;
 wire [31: 0]    imm_B;
 wire [31: 0]    imm_J;
 
