@@ -21,16 +21,16 @@ module IF_ID (
 
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        pc_o[`WIDTH_PC - 1: 0]   <= `WIDTH_PC'b0;
+        pc_o[`WIDTH_PC - 1: 0]     <= `WIDTH_PC'b0;
         inst_o[`WIDTH_INST - 1: 0] <= `WIDTH_PC'b0;
     end
     else if (stop_IF) begin
-        pc_o[`WIDTH_PC - 1: 0]   <= pc_o[`WIDTH_PC - 1: 0];
+        pc_o[`WIDTH_PC - 1: 0]     <= pc_o[`WIDTH_PC - 1: 0];
         inst_o[`WIDTH_INST - 1: 0] <= inst_o[`WIDTH_INST - 1: 0];
     end
     else begin
-        pc_o[`WIDTH_PC - 1: 0]   <= pc[`WIDTH_PC - 1: 0];
-        inst_o[`WIDTH_PC - 1: 0] <= inst[`WIDTH_PC - 1: 0];
+        pc_o[`WIDTH_PC - 1: 0]     <= pc[`WIDTH_PC - 1: 0];
+        inst_o[`WIDTH_PC - 1: 0]   <= inst[`WIDTH_PC - 1: 0];
     end
 end
 

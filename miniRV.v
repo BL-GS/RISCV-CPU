@@ -46,10 +46,13 @@ wire [4: 0]     RegWr_ID, RegWr_EX, RegWr_MEM, RegWr_WB;
 // 运算结果
 reg  [31: 0]    Anum_ID, Anum2_ID, Bnum_ID, Bnum2_ID;
 wire [31: 0]    Anum_EX, Anum2_EX, Bnum_EX, Bnum2_EX;
+reg  [31: 0]    Anum_EX_AfterForwarding, Bnum_EX_AfterForwarding;
+reg  [31: 0]    Anum2_EX_AfterForwarding, Bnum2_EX_AfterForwarding;
 wire [31: 0]    ALUOut_EX, ALUOut_MEM, ALUOut_MEM_mem, ALUOut_WB;
 wire [1: 0]     COMPOut_EX, COMPOut_MEM, COMPOut_WB;
 wire [31: 0]    COMPExOut_WB;
 wire [31: 0]    immOut_ID;
+wire [31: 0]    branch_pc_IF, branch_pc_ID;
 
 // 例外信号
 wire risk_Ctrl;
@@ -106,10 +109,11 @@ IF If (
        .rst_n(rst_n),
        .stop_IF(stop_IF),
        .PCCTRL(PCCTRL_EX),
-       .addOut(ALUOut_EX),
+       .addOut(branch_pc_IF),
        .COMPOut(COMPOut_EX),
        .pc_ID(pc_ID),
        .inst(inst_IF),
+       .inst_ID(inst_ID),
        .pc(pc_IF),
        .risk_Ctrl(risk_Ctrl)
    );
@@ -124,9 +128,17 @@ IF_ID if_id (
           .inst_o(inst_ID)
       );
 
+ID_IF id_if (
+    .clk(clk), 
+    .rst_n(rst_n),
+    .branch_pc(branch_pc_ID),
+    .branch_pc_o(branch_pc_IF)
+);
+
 /****************************************************************
                         译码阶段
 *****************************************************************/
+assign branch_pc_ID = pc_ID + immOut_ID;
 
 // 控制模块
 CTRL ctrl (
@@ -214,9 +226,6 @@ end
                         执行阶段
 *****************************************************************/
 
-reg [31: 0] Anum_EX_AfterForwarding, Bnum_EX_AfterForwarding;
-reg [31: 0] Anum2_EX_AfterForwarding, Bnum2_EX_AfterForwarding;
-
 // 前递数选择
 always @(*) begin
     // A操作数选择
@@ -282,14 +291,14 @@ EX_MEM ex_mem (
        );
 
 /****************************************************************
-                        执行阶段
+                        访存阶段
 *****************************************************************/
 
 assign mem_addr   = ALUOut_MEM_mem;
 assign mem_ctrl   = {Unsigned_MEM, DRAM_EX_TYPE_MEM[1: 0], DRAMWE_MEM};
 assign mem_wd     = DRAMIn_MEM;
 assign mem_we     = DRAMWE_MEM;
-assign DRAMRd_MEM = mem_rd;
+assign DRAMRd_MEM = mem_rd[31: 0];
 
 assign pc4_MEM = pc_MEM + 4;
 

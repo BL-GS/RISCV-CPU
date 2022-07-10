@@ -12,6 +12,7 @@ module IF (
            input    wire [`WIDTH_ALUOUT - 1 : 0]    addOut,
            input    wire [`WIDTH_COMPOUT - 1 : 0]   COMPOut,
            input    wire [`WIDTH_PC - 1 : 0]        pc_ID,
+           input    wire [`WIDTH_INST - 1: 0]       inst_ID,
            output   wire [`WIDTH_INST - 1: 0]       inst,
            output   wire [`WIDTH_PC - 1: 0]         pc,
            output   wire                            risk_Ctrl 
@@ -33,7 +34,8 @@ NPC IF_npc(
         .rst_n(rst_n),
         .stop_IF(stop_IF),
         .current_pc(pc),
-        .inst(inst),
+        .branch_pc(branch_pc),
+        .inst(inst_ID),
         .PCSel(PCSel),
         .npc(next_pc),
         .risk_Ctrl(risk_Ctrl)
@@ -42,8 +44,6 @@ NPC IF_npc(
 PC IF_pc(
        .clk(clk),
        .rst_n(rst_n),
-       .risk_Ctrl(risk_Ctrl),
-       .branch_pc(branch_pc),
        .npc(next_pc),
        .pc(current_pc)
    );

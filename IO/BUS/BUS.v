@@ -18,11 +18,6 @@ module BUS (
            input    wire [`DEVICE_NUM_SWITCH - 1: 0]        switch,
            // 输出设备——LED灯
            output   wire [`DEVICE_NUM_LED - 1: 0]           led,
-           // 输入设备——键盘
-           /*
-           input    wire [`DEVICE_NUM_KB_COL - 1: 0]        col_signal,
-           output   wire [`DEVICE_NUM_KB_ROW - 1: 0]        row_en,
-           */
            // 输出设备——LED数码管
            output   wire [`DEVICE_NUM_NUMLED_EN - 1: 0]     led_en,
            output   wire               led_ca,
@@ -104,7 +99,7 @@ Interface_RAM interface_RAM (
                   .data(data)
               );
 
-Interface_NUMLED_KEYBOARD interface_numled_keyboard (
+Interface_NUMLED interface_numled (
                               .clk(clk),
                               .deviceClk(deviceClk),
                               .rst_n(rst_n),
@@ -112,11 +107,6 @@ Interface_NUMLED_KEYBOARD interface_numled_keyboard (
                               .addr(addr),
                               .ctrl(ctrl_input[1]),
                               .data(data),
-                                /*
-                              .col_signal(col_signal),
-                              .row_en(row_en),
-                              */
-
                               .led_en(led_en),
                               .led_ca(led_ca),
                               .led_cb(led_cb),

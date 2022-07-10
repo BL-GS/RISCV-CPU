@@ -64,9 +64,9 @@
 `define COMP_GE 2'b10
 
 // 读取结果扩展
-`define DRAM_EX_W   2'00
-`define DRAM_EX_H   2'01
-`define DRAM_EX_B   2'11
+`define DRAM_EX_W   2'b00
+`define DRAM_EX_H   2'b01
+`define DRAM_EX_B   2'b11
 
 
 /****************************************************************

@@ -4,7 +4,7 @@
 `include "../../param.v"
 `endif
 
-module Interface_NUMLED_KEYBOARD (
+module Interface_NUMLED (
            input    wire            clk,
            input    wire            deviceClk,
            input    wire            rst_n,
@@ -13,11 +13,6 @@ module Interface_NUMLED_KEYBOARD (
            input    wire [`IO_BUS_WIDTH_CTRL - 1: 0]    ctrl,
            inout    wire [`IO_BUS_WIDTH_DATA - 1: 0]    data, // 与总线连接
 
-           // 输入设备——键盘 
-           /*
-           input    wire [`DEVICE_NUM_KB_COL - 1: 0]        col_signal,
-           output   wire [`DEVICE_NUM_KB_ROW - 1: 0]        row_en,
-           */
            // 输出设备——LED数码管
            output   wire [`DEVICE_NUM_NUMLED_EN - 1: 0]     led_en,
            output   wire               led_ca,
@@ -36,9 +31,6 @@ wire clk_output;
 // 输入线
 wire [`IO_BUS_WIDTH_DATA - 1: 0] data_input; // 数据 -> 缓冲
 wire [`IO_BUS_WIDTH_DATA - 1: 0] input_data; // 缓冲 -> 数据
-// 输出线
-wire [`IO_BUS_WIDTH_DATA - 1: 0] data_output; // 数据 -> 缓冲
-wire [`IO_BUS_WIDTH_DATA - 1: 0] output_data; // 缓冲 -> 数据
 
 // 访问信号类型
 wire ctrl_call;     // 访问控制信号
@@ -46,7 +38,6 @@ wire data_call;     // 访问输入输出
 
 // 输入输出控制
 wire input_call;    // 输入
-wire output_call;   // 输出
 
 
 /***************************************************************
@@ -55,7 +46,6 @@ wire output_call;   // 输出
 
 // 读写控制
 assign input_call  = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_WRITE)) ? 1'b1 : 1'b0;
-assign output_call = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_READ)) ? 1'b1 : 1'b0;
 
 /***************************************************************
                         地址译码
@@ -71,9 +61,6 @@ assign data_call   = (addrOut == `IO_CALL_INOUT) ? 1'b1 : 1'b0;
                         数据交叉开关
 ****************************************************************/
 // 地址译码和控制逻辑内部耦合，无需数据交叉开关控制
-// data输出控制
-assign data =  (output_call) ? data_output :            // 总线同意，数据输出
-       `IO_BUS_WIDTH_DATA'dz;                   // 未定义状况
 // data输入控制
 assign data_input = data;
 
@@ -107,30 +94,4 @@ InputCtrl_NUMLED ledDisplayCtrl (
                      .led_cg(led_cg),
                      .led_dp(led_dp)
                  );
-
-
-/***************************************************************
-                        输出到 CPU
-****************************************************************/
-/*
-assign clk_output = clk;
-
-Buffer  #(.WIDTH(32))
-        output_buf (
-            .clk(clk_output),
-            .rst_n(rst_n),
-            .we(output_call),
-            .din(output_data),
-            .dout(data_output)
-        );
-// TODO: 外设连接
-OutputCtrl_Keyboard keyboardCtrl(
-                        .clk(deviceClk),
-                        .rst_n(rst_n),
-                        .col_signal(col_signal),
-                        .row_en(row_en),
-                        .data(output_data)
-                    );
-*/
-
 endmodule
