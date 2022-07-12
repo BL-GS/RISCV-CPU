@@ -68,6 +68,8 @@
 `define DRAM_EX_W   2'b00
 `define DRAM_EX_H   2'b01
 `define DRAM_EX_B   2'b11
+`define DRAM_EX_B_BIT 0
+`define DRAM_EX_H_BIT 1
 
 
 /****************************************************************
@@ -118,14 +120,10 @@
 // 总线宽度
 `define IO_BUS_WIDTH_ADDR   32  // 地址线宽度
 `define IO_BUS_WIDTH_DATA   32  // 数据线宽度
-`define IO_BUS_WIDTH_CTRL   4   // 控制线宽度
-`define IO_BUS_WIDTH_STATU  2   // 状态总线
+`define IO_BUS_WIDTH_CTRL   1   // 控制线宽度
 
 // 控制总线规定
 `define IO_BUS_CTRL_WE          0
-`define IO_BUS_CTRL_TYPE_B      1
-`define IO_BUS_CTRL_TYPE_H      2 
-`define IO_BUS_CTRL_UNSIGNED    3
 
 // 控制总线读写
 `define IO_CTRL_READ       1'b0    // 不写

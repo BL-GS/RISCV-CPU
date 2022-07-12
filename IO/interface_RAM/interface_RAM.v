@@ -29,8 +29,6 @@ wire [`IO_BUS_WIDTH_DATA - 1: 0] input_data; // 缓冲 -> 数据
 wire [`IO_BUS_WIDTH_DATA - 1: 0] data_output; // 数据 -> 缓冲
 wire [`IO_BUS_WIDTH_DATA - 1: 0] output_data; // 缓冲 -> 数据
 
-
-
 /***************************************************************
                         控制逻辑
 ****************************************************************/
@@ -42,16 +40,6 @@ wire output_call;   // 输出
 // 读写控制
 assign input_call  = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_WRITE)) ? 1'b1 : 1'b0;
 assign output_call = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_READ)) ? 1'b1 : 1'b0;
-
-wire TYPE_B; // byte 类需要的扩展
-wire TYPE_H; // half-word 类需要的扩展
-wire TYPE_HB;
-wire Unsigned; // 符号扩展控制
-
-assign TYPE_B    = ctrl[`IO_BUS_CTRL_TYPE_B];
-assign TYPE_H    = ctrl[`IO_BUS_CTRL_TYPE_H];
-assign TYPE_HB   = TYPE_H | TYPE_B;
-assign Unsigned  = ctrl[`IO_BUS_CTRL_UNSIGNED];
 
 /***************************************************************
                         数据交叉开关
@@ -70,10 +58,6 @@ assign data_input = data;
 assign clk_input = clk; // 时钟上升沿读取
 
 InputCtrl_RAM inputCtrl (
-                  .TYPE_B(TYPE_B),
-                  .TYPE_HB(TYPE_HB),
-                  .lowerAddr(addr[1: 0]),
-                  .rd_RAM(data_output),
                   .din(data_input),
                   .din_RAM(input_data)
               );
@@ -81,10 +65,6 @@ InputCtrl_RAM inputCtrl (
 assign clk_output = clk; // 时钟上升沿写入
 
 OutputCtrl_RAM outputCtrl (
-                   .Unsigned(Unsigned),
-                   .TYPE_B(TYPE_B),
-                   .TYPE_H(TYPE_H),
-                   .lowerAddr(addr[1: 0]),
                    .rd_RAM(data_output),
                    .DRAMRd(output_data)
                );

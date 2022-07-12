@@ -17,7 +17,8 @@ module CTRL (
            output  wire[1: 0]  DRAM_EX_TYPE,
            output  wire        TYPE_COMP,
            output  wire        TYPE_LOAD,
-           output  reg [`WIDTH_PCCTRL - 1: 0]  PCCTRL
+           output  reg [`WIDTH_PCCTRL - 1: 0]  PCCTRL,
+           output  wire        inst_div
        );
 
 /***************************************************************
@@ -182,6 +183,12 @@ always @(*) begin
         end
     endcase
 end
+
+/***************************************************************
+                        指令拆分分析
+****************************************************************/
+
+assign inst_div = s & (DRAM_EX_TYPE[0] | DRAM_EX_TYPE[1]);
 
 
 endmodule

@@ -17,6 +17,7 @@ module ExceptionCTRL (
     input    wire [4: 0]         rs2_ID,
     input    wire [4: 0]         wr_EX,
     input    wire                isLoad,
+    input    wire                inst_div,
     input    wire                isRiskCtrl,
     output   wire                stop_ID,
     output   wire                stop_IF
@@ -39,9 +40,9 @@ assign risk_Ctrl = isRiskCtrl;
 /***************************************************************
                         插入气泡
 ****************************************************************/
-// IF停顿即令指令不变，当Load-Use型冒险时可用；当控制冒险时由于需要接受新的分支PC。故不成立
+// IF停顿即令指令不变，当Load-Use型冒险时 和 指令拆分时 可用；当控制冒险时由于需要接受新的分支PC。故不成立
 // IF停顿时，！！保持！！ IF/ID 寄存器
-assign stop_IF = risk_LoadUse; 
+assign stop_IF = risk_LoadUse | inst_div; 
 // ID停顿即令译码内容不变，当Load-Use型冒险和控制冒险都适用，需要清空当前周期存入的所有信息
 // ID停顿时，！！清空！！ ID/EX 寄存器
 assign stop_ID = risk_LoadUse | risk_Ctrl; 
