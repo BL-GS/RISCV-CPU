@@ -29,6 +29,7 @@ reg [31: 0] din_reg;
 assign bus_addr = addr;
 assign bus_we   = DRAMWE;
 assign bus_ctrl = {DRAMWE};
+assign bus_wd   = din_reg;
 assign DRAMRd   = DRAMRd_reg;
 
 assign TYPE_B    = DRAM_EX_TYPE[`DRAM_EX_B_BIT];
@@ -45,13 +46,13 @@ assign DRAMRd  = DRAMRd_reg;
 always @(*) begin
     case(addr[1: 0])
         2'b00:
-            rd_reg = bus_rd;
+            rd_reg = bus_rd[31: 0];
         2'b01:
-            rd_reg = {8'b0, bus_rd[31: 8]};
+            rd_reg = (TYPE_HB) ? {8'b0, bus_rd[31: 8]} : bus_rd[31: 0];
         2'b10:
-            rd_reg = {16'b0, bus_rd[31: 16]};
+            rd_reg = (TYPE_HB) ? {16'b0, bus_rd[31: 16]} : bus_rd[31: 0];
         default:
-            rd_reg = {24'b0, bus_rd[31: 24]};
+            rd_reg = (TYPE_B) ? {24'b0, bus_rd[31: 24]} : bus_rd[31: 0];
     endcase
 end
 
@@ -59,10 +60,10 @@ end
 always @(*) begin
     DRAMRd_reg[7: 0] = rd_reg[7: 0];
     if (TYPE_B) begin
-        DRAMRd_reg[31: 8] = (Unsigned) ? {24'b0} : {24{DRAMRd_reg[7]}};
+        DRAMRd_reg[31: 8] = (Unsigned) ? {24'b0} : {24{rd_reg[7]}};
     end
     else if (TYPE_H) begin
-        DRAMRd_reg[31: 8] = (Unsigned) ? {16'b0, rd_reg[15: 8]} : {{16{DRAMRd_reg[15]}}, rd_reg[15: 8]};
+        DRAMRd_reg[31: 8] = (Unsigned) ? {16'b0, rd_reg[15: 8]} : {{16{rd_reg[15]}}, rd_reg[15: 8]};
     end
     else begin
         DRAMRd_reg[31: 8] = rd_reg[31: 8];

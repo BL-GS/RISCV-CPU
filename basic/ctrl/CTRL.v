@@ -5,6 +5,8 @@
 `endif
 
 module CTRL (
+           input   wire        clk, 
+           input   wire        rst_n,
            input   wire[6: 0]  func7,
            input   wire[2: 0]  func3,
            input   wire[6: 0]  opecode,
@@ -39,7 +41,7 @@ assign {r, i, s, b, u, j} = type_reg[5: 0];
 
 // 符号扩展控制
 assign SextOpe     = {i, s, b, j, u};
-assign TYPE_COMP   = (opecode[6: 2] == 5'b0?100 && func3[2:1] == 2'b01) ? 1'b1 : 1'b0;
+assign TYPE_COMP   = ({opecode[6], opecode[4: 2]} == 4'b0100 && func3[2:1] == 2'b01) ? 1'b1 : 1'b0;
 assign TYPE_COMP_R = (TYPE_COMP & opecode[5]) ? 1'b1 : 1'b0;
 assign TYPE_COMP_I = (TYPE_COMP & ~opecode[5]) ? 1'b1 : 1'b0;
 assign TYPE_JUMP   = (j || (opecode[6: 2] == 5'b11001)) ? 1'b1 : 1'b0;
@@ -187,8 +189,22 @@ end
 /***************************************************************
                         指令拆分分析
 ****************************************************************/
+// 计数器，防止同一指令由于停顿拆分多次
+reg counter;
 
-assign inst_div = s & (DRAM_EX_TYPE[0] | DRAM_EX_TYPE[1]);
+always @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        counter <= 0;
+    end
+    else if (counter == 1) begin
+        counter <= ~counter;
+    end
+    else begin
+        counter <= inst_div;
+    end
+end
+
+assign inst_div = (counter) ? 0 : (s & (DRAM_EX_TYPE[0] | DRAM_EX_TYPE[1]));
 
 
 endmodule

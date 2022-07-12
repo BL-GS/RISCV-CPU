@@ -5,8 +5,10 @@
 `endif
 
 module InstDivider (
-    input wire [`WIDTH_INST - 1 : 0] inst_in,
-    output wire [`WIDTH_INST - 1 : 0] inst_out
+    input   wire                       clk,
+    input   wire                       rst_n,
+    input   wire [`WIDTH_INST - 1 : 0] inst_in,
+    output  wire [`WIDTH_INST - 1 : 0] inst_out
 );
 
 /***************************************************************
@@ -18,7 +20,7 @@ module InstDivider (
     sb | sh -> [lw x0 same_addr] + (sb | sh)
 */
 assign inst_out[`WIDTH_INST - 1 : 0] = {
-    inst_in[31: 25], inst_in[11: 7], inst_in[19: 12], 5'b0, inst_in[6: 0]
+    inst_in[31: 27], 2'b00, inst_in[11: 7], inst_in[19: 15], inst_in[14], 2'b10, 5'b0, inst_in[6: 0]
 };
 
 endmodule

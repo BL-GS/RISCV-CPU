@@ -149,6 +149,8 @@ InstDivider instDivider (
 
 // 控制模块
 CTRL ctrl (
+         .clk(clk),
+         .rst_n(rst_n),
          .func7(func7_ID),
          .func3(func3_ID),
          .opecode(opecode_ID),
@@ -166,6 +168,8 @@ CTRL ctrl (
      );
 
 CTRL ctrl_INSTDIV (
+         .clk(clk),
+         .rst_n(rst_n),
          .func7(func7_ID_INSTDIV),
          .func3(func3_ID_INSTDIV),
          .opecode(opecode_ID_INSTDIV),
