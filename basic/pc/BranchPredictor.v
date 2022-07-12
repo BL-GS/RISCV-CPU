@@ -45,6 +45,7 @@ assign imm_J = {signalEX_12, inst4, inst3, inst1, inst2, 1'b0};
                         分支预测
 ****************************************************************/
 
+
 always @(*) begin
     if (inst_b) begin
         // B 型指令判断是否跳转

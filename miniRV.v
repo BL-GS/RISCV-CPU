@@ -19,7 +19,7 @@ module mini_rv (
        );
 
 // 地址信号
-wire [31: 0]    pc_IF, pc_ID, pc_EX, pc_MEM, pc4_MEM, pc4_WB;
+wire [31: 0]    pc_IF, pc_ID, pc_EX, pc4_EX, pc4_MEM, pc4_WB;
 wire [31: 0]    pc_IF_ID;
 wire [31: 0]    pc_ID_EX;
 wire [31: 0]    pc_EX_MEM;
@@ -301,11 +301,13 @@ EX Ex (
        .ALUOut(ALUOut_EX)
    );
 
+assign pc4_EX = pc_EX + 4;
+
 
 EX_MEM ex_mem (
            .clk(clk),
            .rst_n(rst_n),
-           .pc(pc_EX),
+           .pc(pc4_EX),
            .DRAM_EX_TYPE(DRAM_EX_TYPE_EX),
            .DRAMWE(DRAMWE_EX),
            .RWSel(RWSel_EX),
@@ -316,7 +318,7 @@ EX_MEM ex_mem (
            .DRAMIn(Bnum2_EX_AfterForwarding), // 对于 s 型指令，必有立即数相加，则用 Bnum2 可以得到寄存器或者前递数据
            .Unsigned(Unsigned_EX),
 
-           .pc_o(pc_MEM),
+           .pc_o(pc4_MEM),
            .DRAM_EX_TYPE_o(DRAM_EX_TYPE_MEM),
            .DRAMWE_o(DRAMWE_MEM),
            .RWSel_o(RWSel_MEM),
@@ -332,6 +334,11 @@ EX_MEM ex_mem (
 /****************************************************************
                         访存阶段
 *****************************************************************/
+reg [31: 0] bus_rd_WB;
+
+always @(posedge clk) begin
+    bus_rd_WB <= DRAMRd_MEM; // 单独延时处理，降低扇出
+end
 
 MEM mem (
     .addr(ALUOut_MEM_mem),
@@ -340,15 +347,13 @@ MEM mem (
     .Unsigned(Unsigned_MEM),
     .bus_rd(mem_rd),
     .din(DRAMIn_MEM),
-    .bus_rd_WB(DRAMRd_WB),
+    .bus_rd_WB(bus_rd_WB),
     .bus_addr(mem_addr),
     .bus_wd(mem_wd),
     .bus_we(mem_we),
     .bus_ctrl(mem_ctrl),
     .DRAMRd(DRAMRd_MEM)
 );
-
-assign pc4_MEM = pc_MEM + 4;
 
 MEM_WB mem_wb (
            .clk(clk),
