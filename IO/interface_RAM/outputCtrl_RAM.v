@@ -1,10 +1,10 @@
 module OutputCtrl_RAM (
-    input wire Unsigned,
-    input wire TYPE_B,
-    input wire TYPE_HB,
-    input wire [1: 0] lowerAddr,
-    input wire [31: 0] rd_RAM,
-    output wire [31: 0] DRAMRd 
+    input   wire            Unsigned,
+    input   wire            TYPE_B,
+    input   wire            TYPE_H,
+    input   wire [1: 0]     lowerAddr,
+    input   wire [31: 0]    rd_RAM,
+    output  wire [31: 0]    DRAMRd 
 );
 
 reg [31: 0] rd_reg;
@@ -16,7 +16,6 @@ assign DRAMRd  = DRAMRd_reg;
 /***************************************************************
                         对读出结果进行扩展
 ****************************************************************/
-
 
 // 根据低位地址进行移位
 always @(*) begin
@@ -35,19 +34,14 @@ end
 // 对读取结果进行扩展
 always @(*) begin
     DRAMRd_reg[7: 0] = rd_reg[7: 0];
-    // 16 - 9 bits extend
     if (TYPE_B) begin
-        DRAMRd_reg[15: 8] = (Unsigned) ?  {8'b0} : {8{DRAMRd_reg[7]}};
+        DRAMRd_reg[31: 8] = (Unsigned) ? {24'b0} : {24{DRAMRd_reg[7]}};
+    end
+    else if (TYPE_H) begin
+        DRAMRd_reg[31: 8] = (Unsigned) ? {16'b0, rd_reg[15: 8]} : {{16{DRAMRd_reg[15]}}, rd_reg[15: 8]};
     end
     else begin
-        DRAMRd_reg[15: 8] = rd_reg[15: 8];
-    end
-    // 32 - 17 bits extend
-    if (TYPE_HB) begin
-        DRAMRd_reg[31: 16] = (Unsigned) ? {16'b0} : {16{DRAMRd_reg[15]}};
-    end
-    else begin
-        DRAMRd_reg[31: 16] = rd_reg[31: 16];
+        DRAMRd_reg[31: 8] = rd_reg[31: 8];
     end
 end
 

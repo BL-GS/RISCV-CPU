@@ -81,9 +81,7 @@ Buffer #(.WIDTH(32))
            .we(input_call),
            .dout(input_data)
        );
-// TODO: 外设连接
 InputCtrl_LED ledCtrl (
-                  .light(1'b1), // TODO: 有待商榷
                   .num_in(input_data),
                   .led(led)
               );
@@ -101,7 +99,6 @@ Buffer  #(.WIDTH(32))
             .din(output_data),
             .dout(data_output)
         );
-// TODO: 外设连接
 OutputCtrl_Switch switchCtrl (
                       .switch(switch),
                       .data(output_data)

@@ -9,7 +9,6 @@ module NPC(
            input   wire rst_n,
            input   wire stop_IF,
            input   wire[`WIDTH_PC - 1: 0]       current_pc,
-           input   wire[`WIDTH_PC - 1: 0]       branch_pc,
            input   wire[`WIDTH_INST - 1: 0]     inst,
            input   wire                         PCSel,
            output  wire[`WIDTH_PC - 1: 0]       npc,
@@ -27,7 +26,7 @@ wire pre_jump;
 
 BranchPredictor branchPredictor (
                     .inst(inst),
-                    .pc((risk_Ctrl) ? branch_pc : current_pc),
+                    .pc(current_pc),
                     .pre_pc(pre_pc),
                     .jump(pre_jump)
                 );

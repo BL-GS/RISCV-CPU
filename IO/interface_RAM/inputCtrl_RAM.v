@@ -17,7 +17,6 @@ assign din_RAM[31: 0] = din_reg[31: 0];
 
 // 根据低位地址对写入结果进行移位
 always @(*) begin
-    din_reg = rd_RAM;
     case (lowerAddr[1: 0])
         2'b00: begin
             din_reg[7: 0]   = din[7: 0];

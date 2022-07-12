@@ -4,7 +4,7 @@
 `include "../param.v"
 `endif
 
-module ID_IF (
+module EX_IF (
     input wire clk,
     input wire rst_n,
     input wire [`WIDTH_PC - 1: 0] branch_pc,

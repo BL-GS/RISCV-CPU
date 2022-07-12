@@ -82,7 +82,6 @@ Buffer #(.WIDTH(32))
 InputCtrl_NUMLED ledDisplayCtrl (
                      .clk(deviceClk),
                      .rst_n(rst_n),
-                     .light(1'b1), // TODO: 有待商榷
                      .num_in(input_data),
                      .led_en(led_en),
                      .led_ca(led_ca),

@@ -52,7 +52,7 @@ wire [31: 0]    ALUOut_EX, ALUOut_MEM, ALUOut_MEM_mem, ALUOut_WB;
 wire [1: 0]     COMPOut_EX, COMPOut_MEM, COMPOut_WB;
 wire [31: 0]    COMPExOut_WB;
 wire [31: 0]    immOut_ID;
-wire [31: 0]    branch_pc_IF, branch_pc_ID;
+wire [31: 0]    branch_pc_IF;
 
 // 例外信号
 wire risk_Ctrl;
@@ -85,8 +85,11 @@ wire [31: 0]    DRAMIn_MEM;
         if (~rst_n) begin
             wbInst <= 0;
         end
-        else if (stop_ID) begin
+        else if (stop_IF) begin
             wbInst[4: 0] <= {wbInst[3: 2], 1'b0, wbInst[1: 0]};
+        end
+        else if (stop_ID) begin
+            wbInst[4: 0] <= {wbInst[3: 2], 2'b0, wbInst[0]};
         end
         else begin
             wbInst[4: 0] <= {wbInst[3: 0], 1'b1};
@@ -109,7 +112,7 @@ IF If (
        .rst_n(rst_n),
        .stop_IF(stop_IF),
        .PCCTRL(PCCTRL_EX),
-       .addOut(branch_pc_IF),
+       .branch_pc(branch_pc_IF),
        .COMPOut(COMPOut_EX),
        .pc_ID(pc_ID),
        .inst(inst_IF),
@@ -128,17 +131,16 @@ IF_ID if_id (
           .inst_o(inst_ID)
       );
 
-ID_IF id_if (
+EX_IF ex_if (
     .clk(clk), 
     .rst_n(rst_n),
-    .branch_pc(branch_pc_ID),
+    .branch_pc(ALUOut_EX),
     .branch_pc_o(branch_pc_IF)
 );
 
 /****************************************************************
                         译码阶段
 *****************************************************************/
-assign branch_pc_ID = pc_ID + immOut_ID;
 
 // 控制模块
 CTRL ctrl (

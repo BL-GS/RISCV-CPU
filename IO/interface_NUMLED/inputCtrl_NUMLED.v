@@ -7,7 +7,6 @@
 module InputCtrl_NUMLED (
            input wire            clk,
            input wire            rst_n,
-           input wire           light,
            input wire  [`IO_BUS_WIDTH_DATA - 1: 0] num_in,
            output wire [`DEVICE_NUM_NUMLED_EN - 1 : 0]  led_en,
            output wire          led_ca,
@@ -124,16 +123,11 @@ always @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
         statu[7: 0] <= 8'b11111111;
     end
-    else if ( light ) begin
-        if (statu[7: 0] == 8'b11111111) begin
-            statu[7 : 0] <= 8'b11111110;
-        end
-        else begin
-            statu[7 : 0] <= {statu[6: 0], statu[7]};
-        end
+    else if (statu[7: 0] == 8'b11111111) begin
+        statu[7 : 0] <= 8'b11111110;
     end
     else begin
-        statu[7 : 0] <= 8'b11111111;
+        statu[7 : 0] <= {statu[6: 0], statu[7]};
     end
 end
 

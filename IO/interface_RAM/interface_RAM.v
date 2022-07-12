@@ -44,11 +44,13 @@ assign input_call  = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_WRITE))
 assign output_call = ((BG == 1'b1) && (ctrl[`IO_BUS_CTRL_WE] == `IO_CTRL_READ)) ? 1'b1 : 1'b0;
 
 wire TYPE_B; // byte 类需要的扩展
-wire TYPE_HB; // byte 和 half-word 类需要的扩展
+wire TYPE_H; // half-word 类需要的扩展
+wire TYPE_HB;
 wire Unsigned; // 符号扩展控制
 
-assign TYPE_B    = ~(ctrl[`IO_BUS_CTRL_TYPE_B] | ctrl[`IO_BUS_CTRL_TYPE_HB]);
-assign TYPE_HB   = (~ctrl[`IO_BUS_CTRL_TYPE_HB]) | TYPE_B;
+assign TYPE_B    = ctrl[`IO_BUS_CTRL_TYPE_B];
+assign TYPE_H    = ctrl[`IO_BUS_CTRL_TYPE_H];
+assign TYPE_HB   = TYPE_H | TYPE_B;
 assign Unsigned  = ctrl[`IO_BUS_CTRL_UNSIGNED];
 
 /***************************************************************
@@ -81,7 +83,7 @@ assign clk_output = clk; // 时钟上升沿写入
 OutputCtrl_RAM outputCtrl (
                    .Unsigned(Unsigned),
                    .TYPE_B(TYPE_B),
-                   .TYPE_HB(TYPE_HB),
+                   .TYPE_H(TYPE_H),
                    .lowerAddr(addr[1: 0]),
                    .rd_RAM(data_output),
                    .DRAMRd(output_data)

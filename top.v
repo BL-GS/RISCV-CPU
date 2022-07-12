@@ -40,16 +40,14 @@ module top(
 ****************************************************************/
 
 wire clk_out;
-wire clk_out_device;
 
 `ifdef DEBUG
 assign clk_out = clk;
-assign clk_out_device = clk;
 `else
 cpuclk cpuClk (
         .clk_in1(clk),
-        .clk_out1(clk_out),
-        .clk_out2(clk_out_device)
+        .locked(locked),
+        .clk_out1(clk_out)
 );
 `endif
 
@@ -95,7 +93,6 @@ mini_rv mini_rv_u (
 
 BUS bus (
         .clk(clk_out),
-        .clk_device(clk_out_device),
         .rst_n(rst_n),
 
 `ifndef DEBUG

@@ -6,10 +6,8 @@
 
 module BranchCTRL (
            input wire [`WIDTH_PCCTRL - 1 : 0]   PCCTRL,
-           input wire [`WIDTH_ALUOUT - 1 : 0]   addOut,
            input wire [`WIDTH_COMPOUT - 1 : 0]  COMPOut,
            input wire [`WIDTH_PC - 1 : 0]       pc_ID,
-           output wire [`WIDTH_ALUOUT - 1 : 0]  branchPC,
            output reg  [`WIDTH_PCSEL - 1 : 0]   PCSel
        );
 
@@ -21,8 +19,6 @@ wire COMP_EQ    = (COMPOut == 2'b00) ? 1'b1 : 1'b0;
 wire COMP_NEQ   = ~COMP_EQ;
 wire COMP_LE    = (COMPOut == 2'b01) ? 1'b1 : 1'b0;
 wire COMP_GE_EQ = ~COMP_LE;
-
-assign branchPC[`WIDTH_ALUOUT - 1 : 0]  = addOut;
 
 always @ (*) begin
     if (branch_b) begin

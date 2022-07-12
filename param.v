@@ -15,6 +15,7 @@
 `define WIDTH_COMPOUT       2
 `define WIDTH_COMP_EX_OUT   32
 `define WIDTH_DRAMRd        32
+`define WIDTH_RegWd         32
 `define WIDTH_REGMARK       5
 
 // 控制信号
@@ -123,7 +124,7 @@
 // 控制总线规定
 `define IO_BUS_CTRL_WE          0
 `define IO_BUS_CTRL_TYPE_B      1
-`define IO_BUS_CTRL_TYPE_HB     2 
+`define IO_BUS_CTRL_TYPE_H      2 
 `define IO_BUS_CTRL_UNSIGNED    3
 
 // 控制总线读写

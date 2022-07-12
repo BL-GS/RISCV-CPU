@@ -8,12 +8,12 @@
 module BHT (
     input   wire            clk,
     input   wire            rst_n,
-    input   wire [31: 0]    pc,
-    input   wire [31: 0]    pc_used,
-    input   wire [31: 0]    pc_used_target,
-    input   wire            isJump,
-    output  wire            isHit,
-    output  reg  [31: 0]    prePC
+    input   wire [31: 0]    pc,             // 当前 PC（准确来说，是ID阶段的PC）
+    input   wire [31: 0]    pc_used,        // 准确来说是 EX 阶段的 PC
+    input   wire [31: 0]    pc_used_target, // EX 阶段判断出来的PC
+    input   wire            isJump,         // 最后判断出来是否跳转
+    output  wire            isHit,          // 是否命中
+    output  reg  [31: 0]    prePC           // 预测跳转的 PC
 );
 
 parameter NO_JUMP         = 2'b00;
@@ -68,9 +68,11 @@ always @(posedge clk or negedge rst_n) begin
         end
     end 
     else begin
+        // 如果没命中
         if (!isHit) begin
             BHT_reg[$unsigned(pc[31: 26])][31: 30] <= {1'b1, pc[25: 2], WEAKLY_NO_JUMP, pc4[31: 2]};
         end
+        // 如果命中
         case (jump_Tag_Judge)
             NO_JUMP: begin
                 BHT_reg[$unsigned(pc_used[31: 26])][31: 30] <= (isJump) ? WEAKLY_NO_JUMP : NO_JUMP;
@@ -98,21 +100,21 @@ end
 ****************************************************************/
 always @(*) begin
         case (jump_Tag)
-        NO_JUMP: begin
-            prePC <= pc4;
-        end
-        WEAKLY_NO_JUMP: begin
-            prePC <= pc4;
-        end
-        WEAKLY_JUMP: begin
-            prePC <= history;
-        end
-        JUMP: begin
-            prePC <= history;
-        end
-        default: begin
-            prePC <= pc4;
-        end
+            NO_JUMP: begin
+                prePC <= pc4;
+            end
+            WEAKLY_NO_JUMP: begin
+                prePC <= pc4;
+            end
+            WEAKLY_JUMP: begin
+                prePC <= history;
+            end
+            JUMP: begin
+                prePC <= history;
+            end
+            default: begin
+                prePC <= pc4;
+            end
         endcase
 end
 

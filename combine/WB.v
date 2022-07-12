@@ -5,12 +5,12 @@
 `endif
 
 module WB (
-           input   wire [31: 0]    pc4,
-           input   wire [31: 0]    COMPExOut,
-           input   wire [31: 0]    ALUOut,
-           input   wire [31: 0]    DRAMRd,
-           input   wire [1: 0]     RWSel,
-           output  wire [31: 0]    RegWd
+           input   wire [`WIDTH_PC - 1: 0]    pc4,
+           input   wire [`WIDTH_ALUOUT - 1: 0]    COMPExOut,
+           input   wire [`WIDTH_ALUOUT - 1: 0]    ALUOut,
+           input   wire [`WIDTH_DRAMRd - 1: 0]    DRAMRd,
+           input   wire [`WIDTH_RWSel - 1: 0]     RWSel,
+           output  wire [`WIDTH_RegWd - 1: 0]     RegWd
        );
 
 reg [31: 0] reg_RegWd;

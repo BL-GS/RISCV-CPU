@@ -6,7 +6,6 @@
 
 module BUS (
            input       wire clk,
-           input       wire clk_device,
            input       wire rst_n,
            input       wire BC, // 总线查询
            input       wire [`IO_BUS_WIDTH_ADDR - 1: 0] addr,
@@ -40,10 +39,10 @@ reg [`IO_INTERFACE_NUM - 1: 0]  BG;    // 总线同意
 
 wire deviceClk;
 
-// 25000 约等于 2ms 多一点 
-DeviceCLK  #(.EXTEND(5000)) 
+// 50000 约等于 2ms 多一点 
+DeviceCLK  #(.EXTEND(50000)) 
            deviceCLK (
-               .clk(clk_device),
+               .clk(clk),
                .rst_n(rst_n),
                .clk_out(deviceClk)
            );
