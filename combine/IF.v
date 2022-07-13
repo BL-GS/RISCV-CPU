@@ -11,7 +11,6 @@ module IF (
            input    wire [`WIDTH_PCCTRL - 1 : 0]    PCCTRL,
            input    wire [`WIDTH_ALUOUT - 1 : 0]    branch_pc,
            input    wire [`WIDTH_COMPOUT - 1 : 0]   COMPOut,
-           input    wire [`WIDTH_PC - 1 : 0]        pc_ID,
            input    wire [`WIDTH_INST - 1: 0]       inst_ID,
            output   wire [`WIDTH_INST - 1: 0]       inst,
            output   wire [`WIDTH_PC - 1: 0]         pc,
@@ -53,8 +52,10 @@ NPC IF_npc(
         .rst_n(rst_n),
         .stop_IF(stop_IF),
         .current_pc(pc),
+        .branch_pc(branch_pc),
         .inst(inst_ID),
         .PCSel(PCSel),
+        .risk_Ctrl_delay(risk_Ctrl_delay),
         .npc(next_pc),
         .risk_Ctrl(risk_Ctrl)
     );
@@ -74,7 +75,6 @@ InstMem IF_irom(
 BranchCTRL branchCTRL (
                .PCCTRL(PCCTRL),
                .COMPOut(COMPOut),
-               .pc_ID(pc_ID),
                .PCSel(PCSel)
            );
 

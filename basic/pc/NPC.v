@@ -9,8 +9,10 @@ module NPC(
            input   wire rst_n,
            input   wire stop_IF,
            input   wire[`WIDTH_PC - 1: 0]       current_pc,
+           input   wire[`WIDTH_PC - 1: 0]       branch_pc,
            input   wire[`WIDTH_INST - 1: 0]     inst,
            input   wire                         PCSel,
+           input   wire                         risk_Ctrl_delay,
            output  wire[`WIDTH_PC - 1: 0]       npc,
            output  wire                         risk_Ctrl
        );
@@ -25,11 +27,16 @@ reg [1: 0] is_jump;
 wire pre_jump;
 
 BranchPredictor branchPredictor (
+                    .clk(clk),
+                    .rst_n(rst_n),
                     .inst(inst),
+                    .risk_Ctrl_delay(risk_Ctrl_delay),
                     .pc(current_pc),
+                    .branch_pc(branch_pc),
                     .pre_pc(pre_pc),
                     .jump(pre_jump)
                 );
+
 
 /***************************************************************
                         程序计数器流向记录

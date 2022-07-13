@@ -67,7 +67,8 @@ always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
         for (i = 0; i < 128; i = i + 1) begin
             // 复位只需要将有效位置 0
-            PCtable[i][`ISAVAIL_BIT] <= 0;
+            PCtable[i][`ISAVAIL_BIT -: `ISAVAIL_WIDTH] <= 0;
+            PCtable[i][`STATUS_BIT -: `STATUS_WIDTH] <= `STATUS_WEAK_NORM;
         end
     end
     else if (isNeededWrite[1]) begin
@@ -108,8 +109,8 @@ wire [`TAG_WIDTH - 1: 0]        blockChoosed_Tag     = blockChoosed[`TAG_BIT -: 
 wire [`STATUS_WIDTH - 1: 0]     blockChoosed_Status  = blockChoosed[`STATUS_BIT -: `STATUS_WIDTH];
 wire [`HISTORY_WIDTH - 1: 0]    blockChoosed_History = blockChoosed[`HISTORY_BIT -: `HISTORY_WIDTH];
 
-// 是否命中
-assign isHit = (blockChoosed_isAvail || blockChoosed_Tag == blockTag) ? 1'b1 : 1'b0;
+// 是否命中 或者 是否需要
+assign isHit = (isNeeded || blockChoosed_isAvail || blockChoosed_Tag == blockTag) ? 1'b1 : 1'b0;
 // 得出预测值
 assign pre_pc = {blockChoosed_History, 2'b0};
 // 是否需要跳转

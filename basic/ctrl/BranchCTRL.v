@@ -7,7 +7,6 @@
 module BranchCTRL (
            input wire [`WIDTH_PCCTRL - 1 : 0]   PCCTRL,
            input wire [`WIDTH_COMPOUT - 1 : 0]  COMPOut,
-           input wire [`WIDTH_PC - 1 : 0]       pc_ID,
            output reg  [`WIDTH_PCSEL - 1 : 0]   PCSel
        );
 

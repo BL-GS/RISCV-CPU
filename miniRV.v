@@ -115,7 +115,6 @@ IF If (
        .PCCTRL(PCCTRL_EX),
        .branch_pc(branch_pc_IF),
        .COMPOut(COMPOut_EX),
-       .pc_ID(pc_ID),
        .inst(inst_IF),
        .inst_ID(inst_ID),
        .pc(pc_IF),
