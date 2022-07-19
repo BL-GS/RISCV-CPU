@@ -163,7 +163,9 @@ CTRL ctrl (
          .TYPE_COMP(TYPE_COMP_ID),
          .TYPE_LOAD(TYPE_LOAD_ID),
          .PCCTRL(PCCTRL_ID),
-         .inst_div(inst_div)
+         .inst_div(inst_div),
+         .ALUop(ALUop_ID),
+         .Unsigned(Unsigned_ID)
      );
 
 CTRL ctrl_INSTDIV (
@@ -181,7 +183,9 @@ CTRL ctrl_INSTDIV (
          .DRAM_EX_TYPE(DRAM_EX_TYPE_ID_INSTDIV),
          .TYPE_COMP(TYPE_COMP_ID_INSTDIV),
          .TYPE_LOAD(TYPE_LOAD_ID_INSTDIV),
-         .PCCTRL(PCCTRL_ID_INSTDIV)    
+         .PCCTRL(PCCTRL_ID_INSTDIV),
+         .ALUop(ALUop_ID_INSTDIV),
+         .Unsigned(Unsigned_ID_INSTDIV)  
 );
 
 ID Id (
@@ -194,15 +198,14 @@ ID Id (
        .RegWr(RegWr_WB),
        .rd1(rd1_ID),
        .rd2(rd2_ID),
-       .immOut(immOut_ID),
-       .ALUop(ALUop_ID),
-       .Unsigned(Unsigned_ID)
+       .immOut(immOut_ID)
    );
 
 ID_EX id_ex (
           .clk(clk),
           .rst_n(rst_n),
           .stop_ID(stop_ID),
+          .inst_div(inst_div),
           .pc(pc_ID),
           .ASel(ASel_ID),
           .BSel(BSel_ID),

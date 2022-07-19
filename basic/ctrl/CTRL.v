@@ -5,7 +5,7 @@
 `endif
 
 module CTRL (
-           input   wire        clk, 
+           input   wire        clk,
            input   wire        rst_n,
            input   wire[6: 0]  func7,
            input   wire[2: 0]  func3,
@@ -20,7 +20,9 @@ module CTRL (
            output  wire        TYPE_COMP,
            output  wire        TYPE_LOAD,
            output  reg [`WIDTH_PCCTRL - 1: 0]  PCCTRL,
-           output  wire        inst_div
+           output  wire        inst_div,
+           output   wire [2: 0]     ALUop,
+           output   wire            Unsigned
        );
 
 /***************************************************************
@@ -156,9 +158,9 @@ end
 ****************************************************************/
 
 assign DRAM_EX_TYPE[1: 0] = {
-    ((func3[1: 0] == 2'b01) ? 1'b1 : 1'b0),   // lh | sh
-    ((func3[1: 0] == 2'b00) ? 1'b1 : 1'b0)    // lb | sb
-};
+           ((func3[1: 0] == 2'b01) ? 1'b1 : 1'b0),   // lh | sh
+           ((func3[1: 0] == 2'b00) ? 1'b1 : 1'b0)    // lb | sb
+       };
 
 /***************************************************************
                         指令跳转分析
@@ -206,5 +208,16 @@ end
 
 assign inst_div = (counter) ? 0 : (s & (DRAM_EX_TYPE[0] | DRAM_EX_TYPE[1]));
 
+/***************************************************************
+                        运算类型分析
+****************************************************************/
+
+ALUope aluOpe (
+           .func7(func7),
+           .func3(func3),
+           .opecode(opecode),
+           .ALUop(ALUop),
+           .Unsigned(Unsigned)
+       );
 
 endmodule

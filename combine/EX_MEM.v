@@ -39,8 +39,16 @@ always @(posedge clk or negedge rst_n) begin
 
     if (~rst_n) begin
         pc_o          [`WIDTH_PC - 1: 0]              <= 0;
+        DRAM_EX_TYPE_o[`WIDTH_DRAM_EX_TYPE - 1: 0]    <= 0;
         DRAMWE_o      [`WIDTH_DRAMWE - 1: 0]          <= 0;
+        RWSel_o       [`WIDTH_RWSel - 1: 0]           <= 0;
+        RegWr_o       [`WIDTH_REGMARK - 1: 0]         <= 0;
         RegWe_o       [`WIDTH_RegWE - 1: 0]           <= 0;
+        COMPOut_o     [`WIDTH_COMPOUT - 1: 0]         <= 0;
+        ALUOut_o      [`WIDTH_ALUOUT - 1: 0]          <= 0;
+        ALUOut_mem_o  [`WIDTH_ALUOUT - 1: 0]          <= 0;
+        DRAMIn_o      [`WIDTH_DRAMIN - 1: 0]          <= 0;
+        Unsigned_o    [`WIDTH_Unsigned - 1: 0]        <= 0;
     end
     else begin
         pc_o          [`WIDTH_PC - 1: 0]              <= pc;

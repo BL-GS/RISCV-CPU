@@ -8,9 +8,7 @@ module ID (
            input    wire [4: 0]     RegWr,
            output   wire [31: 0]    rd1,
            output   wire [31: 0]    rd2,
-           output   wire [31: 0]    immOut,
-           output   wire [2: 0]     ALUop,
-           output   wire            Unsigned
+           output   wire [31: 0]    immOut
        );
 
 /***************************************************************
@@ -54,12 +52,6 @@ ImmGen immGen (
            .out(immOut)
        );
 
-ALUope aluOpe (
-           .func7(func7),
-           .func3(func3),
-           .opecode(opecode),
-           .ALUop(ALUop),
-           .Unsigned(Unsigned)
-       );
+
 
 endmodule
